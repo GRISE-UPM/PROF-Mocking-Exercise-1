@@ -9,6 +9,7 @@ public class SubscriptionServiceTest {
 
 	private SubscriptionService ss;
 	private Client mockClient1 = mock(Client.class);
+	private Client mockClient2 = mock(Client.class);
 
 	@Before
 	public void before() {
@@ -24,5 +25,18 @@ public class SubscriptionServiceTest {
 	public void ClientAddedInList() throws ExistingClientException, NullClientException {
 		ss.addSubscriber(mockClient1);
 		assert(ss.subscribers.contains(mockClient1));
+	}
+
+	@Test(expected = ExistingClientException.class)
+	public void ExceptionOnRepeatedClient() throws ExistingClientException, NullClientException {
+		ss.addSubscriber(mockClient1);
+		ss.addSubscriber(mockClient1);
+	}
+
+	@Test
+	public void SeveralClientsAddedInList() throws ExistingClientException, NullClientException {
+		ss.addSubscriber(mockClient1);
+		ss.addSubscriber(mockClient2);
+		assert(ss.subscribers.contains(mockClient1) && ss.subscribers.contains(mockClient2));
 	}
 }
