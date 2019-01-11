@@ -39,4 +39,14 @@ public class SubscriptionServiceTest {
 		ss.addSubscriber(mockClient2);
 		assert(ss.subscribers.contains(mockClient1) && ss.subscribers.contains(mockClient2));
 	}
+
+	@Test(expected = NullClientException.class)
+	public void ExceptionOnDeleteNullClient() throws NonExistingClientException, NullClientException {
+		ss.removeSubscriber(null);
+	}
+
+	@Test(expected = NonExistingClientException.class)
+	public void ExceptionOnDeleteNotExistingClient() throws NonExistingClientException, NullClientException {
+		ss.removeSubscriber(mockClient1);
+	}
 }
