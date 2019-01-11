@@ -3,6 +3,7 @@ package es.grise.upm.profundizacion.tema8;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class SubscriptionServiceTest {
@@ -47,6 +48,21 @@ public class SubscriptionServiceTest {
 
 	@Test(expected = NonExistingClientException.class)
 	public void ExceptionOnDeleteNotExistingClient() throws NonExistingClientException, NullClientException {
+		ss.removeSubscriber(mockClient1);
+	}
+
+	@Test
+	public void DeleteClientFromService() throws ExistingClientException, NonExistingClientException, NullClientException {
+		ss.addSubscriber(mockClient1);
+		ss.removeSubscriber(mockClient1);
+		assertEquals(ss.subscribers.size(), 0);
+
+	}
+
+	@Test(expected = NonExistingClientException.class)
+	public void ExceptionOnDeletingSameClientTwice() throws ExistingClientException, NonExistingClientException, NullClientException {
+		ss.addSubscriber(mockClient1);
+		ss.removeSubscriber(mockClient1);
 		ss.removeSubscriber(mockClient1);
 	}
 }
