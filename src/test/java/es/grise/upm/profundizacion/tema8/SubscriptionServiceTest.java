@@ -4,13 +4,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 public class SubscriptionServiceTest {
 
 	private SubscriptionService ss;
 	private Client mockClient1 = mock(Client.class);
 	private Client mockClient2 = mock(Client.class);
+	private Message msg = mock(Message.class);
 
 	@Before
 	public void before() {
@@ -65,4 +66,52 @@ public class SubscriptionServiceTest {
 		ss.removeSubscriber(mockClient1);
 		ss.removeSubscriber(mockClient1);
 	}
+
+	// 9 and 10 together
+	@Test
+	public void SeveralClientDeletions() throws ExistingClientException, NonExistingClientException, NullClientException {
+		ss.addSubscriber(mockClient1);
+		ss.addSubscriber(mockClient2);
+		ss.removeSubscriber(mockClient1);
+		ss.removeSubscriber(mockClient2);
+		assertEquals(ss.subscribers.size(), 0);
+	}
+
+	@Test
+	public void ClientReceivesMessageIfHeHasEmail() throws ExistingClientException, NullClientException {
+		when(mockClient1.hasEmail()).thenReturn(true);
+		ss.addSubscriber(mockClient1);
+		ss.sendMessage(msg);
+		verify(mockClient1).receiveMessage(msg);
+	}
+
+	@Test
+	public void ClientDoesNotReceiveMessageIfHeHasNotEmail() throws ExistingClientException, NullClientException {
+		when(mockClient1.hasEmail()).thenReturn(false);
+		ss.addSubscriber(mockClient1);
+		ss.sendMessage(msg);
+		verify(mockClient1, never()).receiveMessage(msg);
+	}
+
+	@Test
+	public void SeveralClientsReceiveMessageIfTheyHaveEmail() throws ExistingClientException, NullClientException {
+		when(mockClient1.hasEmail()).thenReturn(true);
+		when(mockClient2.hasEmail()).thenReturn(true);
+		ss.addSubscriber(mockClient1);
+		ss.addSubscriber(mockClient2);
+		ss.sendMessage(msg);
+		verify(mockClient1).receiveMessage(msg);
+		verify(mockClient2).receiveMessage(msg);
+	}
+
+	@Test
+	public void ClientDoesNotReceivesMessageIfUnsubscribed() throws NonExistingClientException, ExistingClientException, NullClientException {
+		when(mockClient1.hasEmail()).thenReturn(true);
+		ss.addSubscriber(mockClient1);
+		ss.removeSubscriber(mockClient1);
+		ss.sendMessage(msg);
+		verify(mockClient1, never()).receiveMessage(msg);
+	}
+
+
 }
