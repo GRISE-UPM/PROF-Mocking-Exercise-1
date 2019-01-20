@@ -252,6 +252,27 @@ public class SubscriptionServiceTest {
 	
 // 4- Al des-suscribir un Client, éste no recibe mensajes (método receiveMessage()).
 	
-	
+	@Test()
+	public void check_message_after_desubscribe() throws NullClientException, ExistingClientException, NonExistingClientException {
+		
+		SubscriptionService c = new SubscriptionService();
+		Client client1 = mock(Client.class);
+		
+		Message message1 = mock(Message.class);
+
+		when(client1.hasEmail()).thenReturn(true);
+		
+		c.addSubscriber(client1);
+		// Send 2 messages
+		c.sendMessage(message1);
+		// Check if the message has been received
+		verify(client1,times(1)).receiveMessage(message1);
+		// Remove subscriber
+		c.removeSubscriber(client1);
+		// Send message and check if has been received
+		c.sendMessage(message1);
+		verify(client1, times(1)).receiveMessage(message1);
+		
+	}
 
 }
