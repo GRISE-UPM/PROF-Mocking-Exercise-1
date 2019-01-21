@@ -11,9 +11,11 @@ import java.util.Collection;
 public class SubscriptionServiceTest {
 	
 	private SubscriptionService serviceToTest = new SubscriptionService();
+	private Message mess = mock(Message.class);
 	private Client client1=mock(Client.class);
 	private Client client2=mock(Client.class);
 	Collection <Client> subscribers;
+	
 
 
 	/**
@@ -127,12 +129,26 @@ public class SubscriptionServiceTest {
 	 * Test 1:Un Client suscrito recibe mensajes (método receiveMessage()) si tiene email (método hasEmail() == true).
 
 	 */
+	@Test 
+	public void test1_IT() throws NullClientException, ExistingClientException {		
+		when(client1.hasEmail()).thenReturn(true);
+		serviceToTest.addSubscriber(client1);
+		serviceToTest.sendMessage(mess);	
+		verify(client1).receiveMessage(mess);		
+	}
 	
 	/**
 	 * Interaction test
 	 * Test 2:Un Client suscrito no recibe mensajes (método receiveMessage()) si no tiene email (método hasEmail() == false).
 
 	 */
+	@Test 
+	public void test2_IT() throws NullClientException, ExistingClientException,NonExistingClientException {		
+		when(client1.hasEmail()).thenReturn(false);
+		serviceToTest.addSubscriber(client1);
+		serviceToTest.sendMessage(mess);
+		verify(client1,never()).receiveMessage(mess);		
+	}
 	
 	/**
 	 * Interaction test
@@ -140,11 +156,31 @@ public class SubscriptionServiceTest {
 
 	 */
 	
+	@Test 
+	public void test3_IT() throws NullClientException, ExistingClientException, NonExistingClientException{		
+		when(client1.hasEmail()).thenReturn(true);
+		when(client2.hasEmail()).thenReturn(true);
+		serviceToTest.addSubscriber(client1);
+		serviceToTest.addSubscriber(client2);
+		serviceToTest.sendMessage(mess);	
+		verify(client1).receiveMessage(mess);	
+		verify(client2).receiveMessage(mess);			
+	}
+	
 	/**
 	 * Interaction test
 	 * Test 4:Al des-suscribir un Client, éste no recibe mensajes (método receiveMessage()).
 
 	 */
+	@Test 
+	public void test4_IT() throws NullClientException, ExistingClientException, NonExistingClientException {	
+		
+		when(client1.hasEmail()).thenReturn(false);
+		serviceToTest.addSubscriber(client1);
+		serviceToTest.removeSubscriber(client1);
+		serviceToTest.sendMessage(mess);
+		verify(client1,never()).receiveMessage(mess);		
+	}
 	
 	
 }
