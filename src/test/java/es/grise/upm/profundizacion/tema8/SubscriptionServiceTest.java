@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +27,7 @@ public class SubscriptionServiceTest {
 	}
 	
 	@Test
-	public void shouldAddClientCorrectly() throws NullClientException, ExistingClientException{
+	public void shouldAddClientCorrectly() throws NullClientException, ExistingClientException {
 		
 		Client client = mock(Client.class);
 		
@@ -35,16 +38,16 @@ public class SubscriptionServiceTest {
 	}
 	
 	@Test(expected = ExistingClientException.class)
-	public void shouldNotAddClientTwice() throws NullClientException, ExistingClientException{
+	public void shouldNotAddClientTwice() throws NullClientException, ExistingClientException {
 		
 		Client client = mock(Client.class);
-		
 		subscriptionService.addSubscriber(client);
+		
 		subscriptionService.addSubscriber(client);
 	}
 	
 	@Test
-	public void shouldAddSeveralClientCorrectly() throws NullClientException, ExistingClientException{
+	public void shouldAddSeveralClientCorrectly() throws NullClientException, ExistingClientException {
 		
 		Client client1 = mock(Client.class);
 		Client client2 = mock(Client.class);
@@ -61,12 +64,12 @@ public class SubscriptionServiceTest {
 	}
 	
 	@Test(expected = NullClientException.class)
-	public void shouldNotRemoveNullClient() throws NullClientException, NonExistingClientException  {
+	public void shouldNotRemoveNullClient() throws NullClientException, NonExistingClientException {
 		subscriptionService.removeSubscriber(null);
 	}
 	
 	@Test(expected = NonExistingClientException.class)
-	public void shouldNotRemoveUnexistingClient() throws NullClientException, NonExistingClientException  {
+	public void shouldNotRemoveUnexistingClient() throws NullClientException, NonExistingClientException {
 		
 		Client client = mock(Client.class);
 
@@ -74,7 +77,7 @@ public class SubscriptionServiceTest {
 	}
 	
 	@Test
-	public void shouldRemoveExistingClient() throws NullClientException, NonExistingClientException, ExistingClientException  {
+	public void shouldRemoveExistingClient() throws NullClientException, NonExistingClientException, ExistingClientException {
 		
 		Client client = mock(Client.class);
 		subscriptionService.addSubscriber(client);
@@ -86,7 +89,7 @@ public class SubscriptionServiceTest {
 	}
 	
 	@Test(expected = NonExistingClientException.class)
-	public void shouldNotRemoveExistingClientTwice() throws NullClientException, NonExistingClientException, ExistingClientException  {
+	public void shouldNotRemoveExistingClientTwice() throws NullClientException, NonExistingClientException, ExistingClientException {
 		
 		Client client = mock(Client.class);
 		subscriptionService.addSubscriber(client);
@@ -96,12 +99,11 @@ public class SubscriptionServiceTest {
 	}
 	
 	@Test
-	public void shouldRemoveSeveralClientsCorrectly() throws NullClientException, ExistingClientException, NonExistingClientException{
+	public void shouldRemoveSeveralClientsCorrectly() throws NullClientException, NonExistingClientException, ExistingClientException {
 		
 		Client client1 = mock(Client.class);
 		Client client2 = mock(Client.class);
 		Client client3 = mock(Client.class);
-		
 		subscriptionService.addSubscriber(client1);
 		subscriptionService.addSubscriber(client2);
 		subscriptionService.addSubscriber(client3);
@@ -116,12 +118,11 @@ public class SubscriptionServiceTest {
 	}
 	
 	@Test
-	public void shouldRemoveAllClientsCorrectly() throws NullClientException, ExistingClientException, NonExistingClientException{
+	public void shouldRemoveAllClientsCorrectly() throws NullClientException, NonExistingClientException, ExistingClientException {
 		
 		Client client1 = mock(Client.class);
 		Client client2 = mock(Client.class);
 		Client client3 = mock(Client.class);
-		
 		subscriptionService.addSubscriber(client1);
 		subscriptionService.addSubscriber(client2);
 		subscriptionService.addSubscriber(client3);
@@ -134,5 +135,76 @@ public class SubscriptionServiceTest {
 		assertFalse(subscriptionService.subscribers.contains(client1));
 		assertFalse(subscriptionService.subscribers.contains(client2));
 		assertFalse(subscriptionService.subscribers.contains(client3));
+	}
+	
+	@Test
+	public void subscribedClientWithEmailShouldReceiveMessages() throws NullClientException, ExistingClientException {
+		
+		Client client = mock(Client.class);
+		when(client.hasEmail()).thenReturn(true);
+		subscriptionService.addSubscriber(client);
+
+		Message message = mock(Message.class);
+				
+		subscriptionService.sendMessage(message);
+		
+		verify(client).hasEmail();
+		verify(client).receiveMessage(message);
+	}
+	
+	@Test
+	public void subscribedClientWithoutEmailShouldNotReceiveMessages() throws NullClientException, ExistingClientException {
+		
+		Client client = mock(Client.class);
+		subscriptionService.addSubscriber(client);
+
+		Message message = mock(Message.class);
+				
+		subscriptionService.sendMessage(message);
+		
+		verify(client).hasEmail();
+		verify(client, never()).receiveMessage(message);
+	}
+	
+	@Test
+	public void allSubscribedClientsWithEmailShouldReceiveMessages() throws NullClientException, ExistingClientException {
+		
+		Client client = mock(Client.class);
+		when(client.hasEmail()).thenReturn(true);		
+		subscriptionService.addSubscriber(client);
+
+		Client client2 = mock(Client.class);
+		when(client2.hasEmail()).thenReturn(true);		
+		subscriptionService.addSubscriber(client2);
+		
+		Client client3 = mock(Client.class);	
+		subscriptionService.addSubscriber(client3);
+		
+		Message message = mock(Message.class);
+				
+		subscriptionService.sendMessage(message);
+		
+		verify(client).hasEmail();
+		verify(client2).hasEmail();
+		verify(client3).hasEmail();
+		
+		verify(client).receiveMessage(message);
+		verify(client2).receiveMessage(message);
+		verify(client3, never()).receiveMessage(message);
+	}
+	
+	@Test
+	public void unsubscribedClientWithEmailShouldNotReceiveMessages() throws NullClientException, NonExistingClientException, ExistingClientException {
+		
+		Client client = mock(Client.class);
+		when(client.hasEmail()).thenReturn(true);
+		subscriptionService.addSubscriber(client);
+		subscriptionService.removeSubscriber(client);
+
+		Message message = mock(Message.class);
+		subscriptionService.sendMessage(message);
+		
+		verify(client, never()).hasEmail();
+		verify(client, never()).receiveMessage(message);		
 	}
 }
