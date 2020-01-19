@@ -144,6 +144,7 @@ public class SubscriptionServiceTest {
 		verify(c1).receiveMessage(message1);
 	}
 	
+	@Test
 	public void testSubscribedClientEmailNotOkDoesntReceiveMessages() throws NullClientException, NonExistingClientException, ExistingClientException {
 		Client c1 = mock(Client.class);
 		
