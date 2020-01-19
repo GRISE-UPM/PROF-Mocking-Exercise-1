@@ -20,11 +20,15 @@ public class SubscriptionServiceTest {
 	private static Client client2;
 	private static Client client3;
 	
+	private static Message message1;
+	
 	@BeforeClass
 	public static void setUCpClass() {
 		client1 = mock(Client.class);
 		client2 = mock(Client.class);
 		client3 = mock(Client.class);
+		
+		message1 = mock(Message.class);
 	}
 	
 	@Before
@@ -125,5 +129,71 @@ public class SubscriptionServiceTest {
 		assertTrue(subscriptionService.subscribers.isEmpty());
 		
 	}
+	
+	@Test
+	public void testSubscribedClientEmailOkReceiveMessages() throws NullClientException, NonExistingClientException, ExistingClientException {
+		Client c1 = mock(Client.class);
+		
+		when(c1.hasEmail()).thenReturn(true);
+		
+		subscriptionService.addSubscriber(c1);
+		
+		subscriptionService.sendMessage(message1);
+		
+		verify(c1).hasEmail();
+		verify(c1).receiveMessage(message1);
+	}
+	
+	public void testSubscribedClientEmailNotOkDoesntReceiveMessages() throws NullClientException, NonExistingClientException, ExistingClientException {
+		Client c1 = mock(Client.class);
+		
+		when(c1.hasEmail()).thenReturn(false);
+		
+		subscriptionService.addSubscriber(c1);
+		
+		subscriptionService.sendMessage(message1);
+		
+		verify(c1).hasEmail();
+		verify(c1, never()).receiveMessage(message1);
+	}
+	
+	@Test
+	public void testVariousSubscribedClientEmailOkReceiveMessages() throws NullClientException, NonExistingClientException, ExistingClientException {
+		Client c1 = mock(Client.class);
+		Client c2 = mock(Client.class);
+		
+		when(c1.hasEmail()).thenReturn(true);
+		when(c2.hasEmail()).thenReturn(true);
+		
+		subscriptionService.addSubscriber(c1);
+		subscriptionService.addSubscriber(c2);
+		
+		subscriptionService.sendMessage(message1);
+		
+		verify(c1).hasEmail();
+		verify(c2).hasEmail();
+		verify(c1).receiveMessage(message1);
+		verify(c2).receiveMessage(message1);
+	}
+	
+	@Test
+	public void testUnSubscribedClientEmailDontReceiveMessages() throws NullClientException, NonExistingClientException, ExistingClientException {
+		Client c1 = mock(Client.class);
+		
+		when(c1.hasEmail()).thenReturn(true);
+		
+		subscriptionService.addSubscriber(c1);
+		
+		subscriptionService.sendMessage(message1);
+		
+		subscriptionService.removeSubscriber(c1);
+		
+		subscriptionService.sendMessage(message1);
+		
+		// Only receives the first msg; when the second message was sent, the client was UnSubscribed
+		verify(c1, times(1)).hasEmail();
+		verify(c1, times(1)).receiveMessage(message1);
+	}
+	
 	
 }
