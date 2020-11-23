@@ -267,7 +267,7 @@ public class SubscriptionServiceTest {
 	 * @throws NullClientException 
 	 */
 	@Test
-	public void Multiple_Client_Subscribed_No_Recived_Correctly_Msg_Test() throws NullClientException, NonExistingClientException {
+	public void client_Subscribed_No_Recived_Msg_Test() throws NullClientException, NonExistingClientException {
 		
 		Client client = mock(Client.class);
 		Message message = mock(Message.class);
