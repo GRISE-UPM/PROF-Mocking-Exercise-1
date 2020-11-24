@@ -2,8 +2,10 @@ package es.grise.upm.profundizacion.tema8;
 
 import org.junit.jupiter.api.*;
 import org.mockito.internal.util.reflection.Whitebox;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -152,6 +154,7 @@ public class SubscriptionServiceTest {
         this.subscriptionService.sendMessage(message);
 
         verify(client).receiveMessage(message);
+        verify(client, times(1)).hasEmail();
     }
 
     @Test
@@ -169,5 +172,42 @@ public class SubscriptionServiceTest {
         this.subscriptionService.sendMessage(message);
 
         verify(client, times(0)).receiveMessage(message);
+        verify(client, times(1)).hasEmail();
+    }
+
+    @Test
+    public void clientsReceiveMessageTest() {
+        Client client = mock(Client.class);
+        Iterator<Client> iterator = mock(Iterator.class);
+
+        when(this.subscribers.iterator()).thenReturn(iterator);
+        when(iterator.hasNext()).thenReturn(true, true, true, false);
+        when(iterator.next()).thenReturn(client);
+
+        when(client.hasEmail()).thenReturn(true, false, true);
+
+        Message message = mock(Message.class);
+        this.subscriptionService.sendMessage(message);
+
+        verify(client, times(2)).receiveMessage(message);
+        verify(client, times(3)).hasEmail();
+    }
+
+    @Test
+    public void removeClientsReceiveNoMessageTest() {
+        Client client = mock(Client.class);
+        Iterator<Client> iterator = mock(Iterator.class);
+
+        when(this.subscribers.iterator()).thenReturn(iterator);
+        when(iterator.hasNext()).thenReturn(false);
+        when(iterator.next()).thenReturn(client);
+
+        when(client.hasEmail()).thenReturn(true);
+
+        Message message = mock(Message.class);
+        this.subscriptionService.sendMessage(message);
+
+        verify(client, times(0)).receiveMessage(message);
+        verify(client, times(0)).hasEmail();
     }
 }
