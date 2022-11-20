@@ -15,6 +15,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
+		<junit-platform.version>1.6.2</junit-platform.version>
+		<junit-jupiter.version>5.6.2</junit-jupiter.version>
+		<maven.version>3.8.0</maven.version>
+		<java.version>11</java.version>
 	</properties>
 
 	<dependencies>
@@ -30,5 +34,36 @@
 			<version>1.10.19</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit-jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+	
+	<build>
+		<plugins>
+			<!-- https://stackoverflow.com/questions/49398894/unable-to-compile-simple-java-10-java-11-project-with-maven -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven.version}</version>
+				<configuration>
+					<release>${java.version}</release>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.0</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.22.0</version>
+			</plugin>
+		</plugins>
+	</build>
 </project>
