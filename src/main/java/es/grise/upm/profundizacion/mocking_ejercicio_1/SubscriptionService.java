@@ -30,5 +30,4 @@ public class SubscriptionService {
 				client.receiveMessage(message);
 		}
 	}
-
 }
