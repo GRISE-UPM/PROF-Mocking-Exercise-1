@@ -3,6 +3,9 @@ package es.grise.upm.profundizacion.mocking_ejercicio_1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
@@ -107,20 +110,41 @@ public class SubscriptionServiceTest {
 	
 	
 	// INTERACTION TESTS
-	
-	/* 
 
-		Interaction tests
-		
-		Un Client suscrito recibe mensajes (método receiveMessage() si tiene email (método hasEmail() == true).
-		
-		Un Client suscrito no recibe mensajes (método receiveMessage() si no tiene email (método hasEmail() == false).
-		
-		Varios  Client suscritos reciben mensajes (método receiveMessage() si tienen email (método hasEmail() == true).
-		
-		Al des-suscribir un Client éste no recibe mensajes (método receiveMessage()).
-		
+    @Test
+    public void clientReceiveMessageTest() throws Exception {
+        subscriptionService.addSubscriber(client1);
+        when(client1.hasEmail()).thenReturn(true);
+        subscriptionService.sendMessage(message);
+        verify(client1).receiveMessage(message);
+    }
 
-	 */
+    @Test
+    public void clientWithoutEmailDoesntReceiveMessageTest() throws Exception {
+        subscriptionService.addSubscriber(client1);
+        when(client1.hasEmail()).thenReturn(false);
+        subscriptionService.sendMessage(message);
+        verify(client1, times(0)).receiveMessage(message);
+    }
+
+    @Test
+    public void multipleClientsReceiveMessageTest() throws Exception {
+        subscriptionService.addSubscriber(client1);
+        subscriptionService.addSubscriber(client2);
+        when(client1.hasEmail()).thenReturn(true);
+        when(client2.hasEmail()).thenReturn(true);
+        subscriptionService.sendMessage(message);
+        verify(client1).receiveMessage(message);
+        verify(client2).receiveMessage(message);
+    }
+
+    @Test
+    public void unsubscribedClientDoesntReceiveMessageTest() throws Exception {
+        subscriptionService.addSubscriber(client1);
+        subscriptionService.removeSubscriber(client1);
+        when(client1.hasEmail()).thenReturn(true);
+        subscriptionService.sendMessage(message);
+        verify(client1, times(0)).receiveMessage(message);
+    }
 	 
 }
