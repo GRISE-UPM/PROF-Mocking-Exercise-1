@@ -6,7 +6,7 @@ import java.util.Collection;
 public class SubscriptionService {
 	
 	// Cannot be private due to testability issues
-	Collection <Client> subscribers = new ArrayList<Client>();
+	public Collection <Client> subscribers = new ArrayList<Client>();
 	
 	public void addSubscriber(Client client) throws NullClientException, ExistingClientException {
 		if(client == null)
